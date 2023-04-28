@@ -60,3 +60,18 @@ Deberas ver algo como esto en la terminal:
 ![Image Text](/imgs/img2.png)
 
 Si quieres detener el servicio, solo has **ctrl + c** en la terminal o cierrala.
+***
+
+## Detalles importantes 👁️
+
+1. El paso ***2*** de la descarga, solo es necesario si eliminaste la carpeta donde se encuentra el proyecto.
+2. Para realizar una actualizacion de cambios, es tan sencillo como ejecutar este comando, en una terminal que este en el directorio del proyecto:
+```
+git pull
+```
+4. Siempre que actualices el proyecto ejecuta el comando
+```
+npm install
+```
+
+>En caso de que algo te de error y neta no sepas que pedo, me mandas mensaje xd
