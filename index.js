@@ -24,6 +24,8 @@ app.use('/api/cat', require('./src/routes/categorias'));
 
 app.use('/api/car', require('./src/routes/carritos'));
 
+app.use('/api/shop', require('./src/routes/compras'));
+
 app.listen(port, () => {
   console.log(`Servidor listo en el PORT: ${port}`);
 })
