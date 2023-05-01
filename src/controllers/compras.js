@@ -1,12 +1,14 @@
 const { response } = require('express');
 const Compra = require('../models/Compra');
+const Carrito = require('../models/Carrito');
+const { updateStock } = require('./productos');
 
 const updateCompra = async (req, res = response) => {
   const { uid } = req;
 
   try {
 
-    const { compras } = req.body;
+    const { compras, idcarrito } = req.body;
 
     const compra = await Compra.find({ uiduser: uid });
 
@@ -21,6 +23,14 @@ const updateCompra = async (req, res = response) => {
 
       compraNueva.save();
 
+      if (idcarrito) {
+
+        compras.forEach(prod => {
+          updateStock(prod.articulo, prod.cantidad);
+        })
+
+        await Carrito.deleteMany({ uiduser: uid }).then(data => console.log(data))
+      }
       return res.status(202).json({
         ok: true,
         msg: 'Compra realizada',
@@ -31,9 +41,15 @@ const updateCompra = async (req, res = response) => {
     const { id, compralist } = compra[0];
     compras.forEach(prod => {
       compralist.push(prod);
+
+      updateStock(prod.articulo, prod.cantidad);
     });
 
     await Compra.findByIdAndUpdate(id, { compralist });
+
+    if (idcarrito) {
+      await Carrito.deleteMany({ uiduser: uid }).then(data => console.log(data))
+    }
 
     return res.status(202).json({
       ok: true,

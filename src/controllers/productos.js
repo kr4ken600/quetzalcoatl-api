@@ -1,9 +1,9 @@
 const { response } = require('express');
 const Producto = require('../models/Producto');
 
-const createProducto = async (req, res=response) => {
+const createProducto = async (req, res = response) => {
   try {
-    
+
     const producto = new Producto(req.body);
 
     await producto.save();
@@ -22,9 +22,9 @@ const createProducto = async (req, res=response) => {
   }
 }
 
-const getProductos = async (req, res=response) => {
+const getProductos = async (req, res = response) => {
   try {
-    
+
     const productos = await Producto.find();
 
     return res.status(200).json({
@@ -41,10 +41,10 @@ const getProductos = async (req, res=response) => {
   }
 }
 
-const getProducto = async (req, res=response) => {
+const getProducto = async (req, res = response) => {
   const id = req.params.id;
   try {
-    
+
     const producto = await Producto.findById(id);
     return res.status(200).json({
       ok: true,
@@ -60,10 +60,10 @@ const getProducto = async (req, res=response) => {
   }
 }
 
-const getVendidos = async (req, res=response) => {
+const getVendidos = async (req, res = response) => {
   try {
-    
-    const prod1 = await Producto.find({categoria: 'cubiertas'}).limit(1).exec();
+
+    const prod1 = await Producto.find({ categoria: 'cubiertas' }).limit(1).exec();
     const productos = [prod1, prod1];
     return res.status(200).json({
       ok: true,
@@ -81,23 +81,38 @@ const getVendidos = async (req, res=response) => {
 
 const getFiltro = async (req, res = response) => {
   const categoria = req.params.categoria;
-  try{
+  try {
 
-    const productos = await Producto.find({categoria});
+    const productos = await Producto.find({ categoria });
 
     return res.status(200).json({
       ok: true,
       productos
     })
 
-  }catch(error){
+  } catch (error) {
     console.log(error);
     return res.status(500).json({
       ok: false,
       msg: 'Error interno'
     })
   }
-} 
+}
+
+const updateStock = async (idProducto, resStok) => {
+
+  try {
+
+    const prod = await Producto.findById(idProducto);
+    let newStock = prod.stock - resStok;
+
+    await Producto.findByIdAndUpdate(idProducto, {stock: newStock});
+
+  } catch (error) {
+    console.log(error);
+    return;
+  }
+}
 
 
 module.exports = {
@@ -105,5 +120,6 @@ module.exports = {
   getProductos,
   getVendidos,
   getFiltro,
-  getProducto
+  getProducto,
+  updateStock
 }
