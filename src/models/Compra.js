@@ -8,7 +8,7 @@ const ComrpraSchema = Schema({
     type: String,
     required: true
   },
-  productos: [
+  compralist: [
     {
       cantidad: {
         type: Number,
@@ -22,6 +22,20 @@ const ComrpraSchema = Schema({
       fecha_compra: {
         type: Date,
         default: dateMexico
+      },
+      iddireccion: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'Direccion'
+      },
+      idtarjeta: {
+        type: Schema.Types.ObjectId,
+        required: false,
+        ref: 'tarjeta'
+      },
+      estatus: {
+        type: Boolean,
+        required: true,
       }
     }
   ]

@@ -1,13 +1,12 @@
 const { response } = require('express');
 const Compra = require('../models/Compra');
-const Detalle = require('../models/Detalle');
 
 const updateCompra = async (req, res = response) => {
   const { uid } = req;
 
   try {
 
-    const { compras, direccion, tarjeta } = req.body;
+    const { compras } = req.body;
 
     const compra = await Compra.find({ uiduser: uid });
 
@@ -15,14 +14,12 @@ const updateCompra = async (req, res = response) => {
 
       const newC = {
         uiduser: uid,
-        productos: compras
+        compralist: compras
       }
 
       const compraNueva = new Compra(newC);
 
       compraNueva.save();
-
-      createDetalle(compraNueva.id, direccion, tarjeta);
 
       return res.status(202).json({
         ok: true,
@@ -31,14 +28,12 @@ const updateCompra = async (req, res = response) => {
       })
     }
 
-    const { id, productos } = compra[0];
+    const { id, compralist } = compra[0];
     compras.forEach(prod => {
-      productos.push(prod);
+      compralist.push(prod);
     });
 
-    await Compra.findByIdAndUpdate(id, { productos });
-
-    createDetalle(id, direccion, tarjeta);
+    await Compra.findByIdAndUpdate(id, { compralist });
 
     return res.status(202).json({
       ok: true,
@@ -54,33 +49,11 @@ const updateCompra = async (req, res = response) => {
   }
 }
 
-const createDetalle = async (idcompra, iddireccion, idtarjeta) => {
-  const detalle = {
-    idcompra,
-    iddireccion,
-    idtarjeta,
-    estatus: false,
-  }
-  try {
-    const cDetalle = new Detalle(detalle);
-
-    cDetalle.save();
-
-    console.log('Detalle creado');
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      ok: false,
-      msg: 'Error interno'
-    })
-  }
-}
-
 const getCompras = async (req, res = response) => {
   const { uid } = req;
   try {
 
-    const compras = await Compra.find({ uiduser: uid }).populate('productos.articulo');
+    const compras = await Compra.find({ uiduser: uid }).populate('compralist.articulo');
 
     return res.status(200).json({
       ok: true,
@@ -97,7 +70,29 @@ const getCompras = async (req, res = response) => {
   }
 }
 
+const getDetalle = async (req, res = response) => {
+  const id = req.params.id;
+  const { uid } = req;
+  try {
+
+    const detalle = await Compra.find({ uiduser: uid }).populate(['compralist.articulo', 'compralist.iddireccion', 'compralist.idtarjeta'])
+
+    const articulo = detalle[0].compralist.filter((art) => art.id === id);
+
+
+    res.status(201).json({ ok: true, articulo })
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno'
+    })
+  }
+}
+
 module.exports = {
   updateCompra,
-  getCompras
+  getCompras,
+  getDetalle
 }
