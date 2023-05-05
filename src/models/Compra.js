@@ -5,11 +5,16 @@ const dateMexico = moment.tz(Date.now(), 'America/Mexico_City');
 
 const ComrpraSchema = Schema({
   uiduser: {
-    type: String,
-    required: true
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'Usuario'
   },
   compralist: [
     {
+      identificador: {
+        type: String,
+        required: true
+      },
       cantidad: {
         type: Number,
         required: true

@@ -10,8 +10,8 @@ router.get('', getCategoria);
 router.get('/:principal', getFiltro);
 
 router.post('/new', [
-  check('nombre', 'campo requerido').notEmpty(),
   check('principal', 'campo requerido').notEmpty(),
+  check('subcategoria', 'campo requerido').notEmpty(),
   validate
 ], createCategoria);
 

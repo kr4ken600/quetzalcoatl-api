@@ -12,10 +12,11 @@ const validarJWT = (req, res, next) => {
 
   try {
     
-    const { uid, username } = jwt.verify(token, process.env.SECRET_JWT_SEED);
+    const { uid, username, role } = jwt.verify(token, process.env.SECRET_JWT_SEED);
 
     req.uid = uid;
     req.username = username;
+    req.role = role;
 
   } catch (error) {
     console.log(error);

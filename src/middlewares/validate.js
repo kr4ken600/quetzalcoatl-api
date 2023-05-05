@@ -14,6 +14,20 @@ const validate = (req, res, next) => {
   next()
 }
 
+const validRoleAdmin = (req, res, next) => {
+  const role = req.role;
+
+  if (role !== 'admin') {
+    return res.status(404).json({
+      ok: false,
+      msg: 'Usuario no valido'
+    });
+  }
+
+  next();
+}
+
 module.exports = {
-  validate
+  validate,
+  validRoleAdmin
 }

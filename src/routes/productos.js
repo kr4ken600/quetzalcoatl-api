@@ -1,7 +1,8 @@
 const { Router } = require('express');
 const { check } = require('express-validator');
-const { validate } = require('../middlewares/validate');
-const { createProducto, getProductos, getVendidos, getFiltro, getProducto } = require('../controllers/productos');
+const { validate, validRoleAdmin } = require('../middlewares/validate');
+const { validarJWT } = require('../middlewares/validToken');
+const { createProducto, getProductos, getVendidos, getFiltro, getProducto, actualziarData } = require('../controllers/productos');
 
 const router = Router();
 
@@ -14,7 +15,14 @@ router.post('/new', [
   check('categoria', 'La categoria es obligatorio').notEmpty(),
   check('img', 'La img es obligatorio').notEmpty(),
   validate,
+  validarJWT,
+  validRoleAdmin
 ], createProducto);
+
+router.post('/update/:id', [
+  validarJWT,
+  validRoleAdmin
+] ,actualziarData);
 
 router.get('/ventas', getVendidos);
 router.get('/all', getProductos);

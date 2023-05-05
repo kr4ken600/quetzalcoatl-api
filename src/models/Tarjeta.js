@@ -2,8 +2,9 @@ const { Schema, model } = require('mongoose');
 
 const TarjetaSchema = Schema({
   uiduser: {
-    type: String,
-    required: true
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'Usuario'
   },
   numeroT: {
     type: String,

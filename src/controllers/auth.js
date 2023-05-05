@@ -1,12 +1,16 @@
+const { generateJWT } = require('../utils/jwt');
 const { response } = require('express');
 const bcrypt = require('bcryptjs');
 const Usuario = require('../models/Usuario');
-const { generateJWT } = require('../utils/jwt');
+const Carrito = require('../models/Carrito');
+const Tarjeta = require('../models/Tarjeta');
+const Direccion = require('../models/Direccion');
+const Compra = require('../models/Compra');
 
 
 const crearUser = async (req, res = response) => {
 
-  const { username, email, password } = req.body;
+  const { username, email, password, role } = req.body;
 
   try {
     let user = await Usuario.findOne({ email });
@@ -30,6 +34,7 @@ const crearUser = async (req, res = response) => {
       ok: true,
       uid: newUser.id,
       username,
+      role,
       token
     })
 
@@ -66,11 +71,12 @@ const loginUser = async (req, res = response) => {
       })
     }
 
-    const token = await generateJWT(user.id, user.username);
+    const token = await generateJWT(user.id, user.username, user.role);
 
     return res.json({
       ok: true,
       uid: user.id,
+      role: user.role,
       username: user.username,
       token
     })
@@ -86,7 +92,7 @@ const loginUser = async (req, res = response) => {
 
 const revalidToken = async (req, res = response) => {
 
-  const { uid, username } = req;
+  const { uid, username, role } = req;
 
   try {
     const token = await generateJWT(uid, username);
@@ -94,6 +100,7 @@ const revalidToken = async (req, res = response) => {
     return res.json({
       ok: true,
       uid: uid,
+      role,
       username: username,
       token
     });
@@ -106,8 +113,40 @@ const revalidToken = async (req, res = response) => {
   }
 }
 
+const deleteUser = async (req, res = response) => {
+  try {
+
+    const { uid } = req;
+
+    Direccion.deleteMany({ uiduser: uid }).then(d => console.log(d)).catch(err => console.log(err));
+
+
+    Tarjeta.deleteMany({ uiduser: uid }).then(d => console.log(d)).catch(err => console.log(err));
+
+
+    Compra.deleteMany({ uiduser: uid }).then(d => console.log(d)).catch(err => console.log(err));
+
+
+    Carrito.deleteMany({ uiduser: uid }).then(d => console.log(d)).catch(err => console.log(err));
+
+    Usuario.findByIdAndRemove(uid).then(d => console.log(d)).catch(err => console.log(err));
+
+    return res.status(200).json(
+      { ok: true, msg: 'Usuario eliminado permanentemente.' }
+    )
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno'
+    })
+  }
+}
+
 module.exports = {
   crearUser,
   loginUser,
-  revalidToken
+  revalidToken,
+  deleteUser
 }

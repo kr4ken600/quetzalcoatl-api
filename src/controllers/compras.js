@@ -3,6 +3,8 @@ const Compra = require('../models/Compra');
 const Carrito = require('../models/Carrito');
 const { updateStock } = require('./productos');
 
+const mongoose = require("mongoose");
+
 const updateCompra = async (req, res = response) => {
   const { uid } = req;
 
@@ -25,12 +27,12 @@ const updateCompra = async (req, res = response) => {
 
       if (idcarrito) {
 
-        compras.forEach(prod => {
-          updateStock(prod.articulo, prod.cantidad);
-        })
-
-        await Carrito.deleteMany({ uiduser: uid }).then(data => console.log(data))
+        await Carrito.deleteMany({ uiduser: uid });
       }
+
+      compras.forEach(prod => {
+        updateStock(prod.articulo, prod.cantidad);
+      })
       return res.status(202).json({
         ok: true,
         msg: 'Compra realizada',
@@ -48,7 +50,7 @@ const updateCompra = async (req, res = response) => {
     await Compra.findByIdAndUpdate(id, { compralist });
 
     if (idcarrito) {
-      await Carrito.deleteMany({ uiduser: uid }).then(data => console.log(data))
+      await Carrito.deleteMany({ uiduser: uid });
     }
 
     return res.status(202).json({
@@ -107,8 +109,71 @@ const getDetalle = async (req, res = response) => {
   }
 }
 
+const getDetalleAdmin = async (req, res = response) => {
+  try {
+
+    const detalles = await Compra.find().populate(['compralist.articulo', 'compralist.iddireccion', 'compralist.idtarjeta'])
+
+    res.status(201).json({ ok: true, detalles })
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno'
+    })
+  }
+}
+
+const updateStatus = async (req, res = response) => {
+  try {
+    const { uid, idprod } = req.body;
+    const id = new mongoose.Types.ObjectId(idprod);
+
+    const compras = await Compra.find({ uiduser: uid });
+
+    const detalle = await Compra.aggregate([
+      {
+        $unwind: "$compralist"
+      },
+      {
+        $match: {
+          "compralist._id": id
+        }
+      }
+    ]);
+
+    const art = detalle[0].compralist;
+    art.estatus = true;
+    const identificador = art.identificador;
+
+
+    const idCompra = compras[0]._id;
+
+    const result = compras[0].compralist.filter(c => c.identificador !== identificador);
+
+    result.push(art);
+
+    await Compra.findByIdAndUpdate(idCompra, { compralist: result });
+
+    res.status(200).json({
+      ok: true,
+      msg: 'Compra Actualizada'
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      ok: false,
+      msg: 'Error interno'
+    })
+  }
+}
+
 module.exports = {
   updateCompra,
   getCompras,
-  getDetalle
+  getDetalle,
+  getDetalleAdmin,
+  updateStatus
 }
